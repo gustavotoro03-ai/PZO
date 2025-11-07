@@ -1,0 +1,591 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Pozo - Compartido</title>
+  <style>
+    body {
+      font-family: Arial, Helvetica, sans-serif;
+      padding: 20px;
+      background: #cce7ff;
+      margin: 0;
+    }
+    h1 {
+      margin-bottom: 6px;
+      font-size: 24px;
+      color: #004a99;
+    }
+    .card {
+      background: white;
+      padding: 20px 24px;
+      border-radius: 12px;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+      max-width: 820px;
+      margin: auto;
+      transition: transform 0.2s;
+      position: relative;
+      overflow: hidden;
+      padding-top: 20px;
+    }
+    .card:hover { transform: translateY(-2px); }
+
+    .purple-text { color: #8000ff; }
+    .card-logo {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      width: 40px;
+      height: auto;
+      z-index: 10;
+    }
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid #e0e0e0;
+      padding-bottom: 12px;
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+    }
+    .meta { margin-top: 4px; color: #666; font-size: 13px; }
+    .status { font-size: 13px; color: #555; margin-top: 6px; }
+    .countdown { font-weight: bold; color: #004a99; margin-top: 6px; }
+    .footer-note { margin-top: 16px; color: #555; font-size: 13px; text-align: center; }
+
+    label.small { color: #555; font-size: 14px; font-weight: 500; }
+    input.name {
+      width: 100%;
+      padding: 8px 12px;
+      border-radius: 6px;
+      border: 1px solid #bbb;
+      font-size: 14px;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      box-sizing: border-box;
+    }
+    input.name:focus {
+      outline: none;
+      border-color: #3399ff;
+      box-shadow: 0 0 6px rgba(51,153,255,0.3);
+    }
+
+    .table-container { margin-top: 12px; }
+
+    .pair-card {
+      background: #f2f9ff;
+      border-radius: 8px;
+      padding: 12px 16px;
+      margin-bottom: 10px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    .pair-card label {
+      width: 100%;
+      font-weight: 500;
+      margin-bottom: 6px;
+      color: #004a99;
+    }
+    .pair-card input {
+      flex: 1 1 45%;
+      margin-right: 10px;
+      margin-bottom: 6px;
+    }
+
+    #clearBtn {
+      padding: 8px 16px;
+      background: #ff6666;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+      margin-top: 12px;
+    }
+    #clearBtn:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+    }
+
+    #rankingSection {
+      max-width: 820px;
+      margin: 20px auto;
+      background: white;
+      border-radius: 12px;
+      padding: 18px;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+    }
+    #rankingSection h2 { color: #004a99; margin-top: 0; }
+    #rankingTable {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 12px;
+    }
+    #rankingTable th, #rankingTable td {
+      padding: 8px 10px;
+      border-bottom: 1px solid #eee;
+      text-align: left;
+    }
+    #rankingTable th {
+      background: #e6f0ff;
+      color: #004a99;
+      font-weight: 600;
+    }
+
+    @media(min-width:601px) {
+      .table-container table {
+        width: 100%;
+        border-collapse: collapse;
+        min-width: 400px;
+        background: #f9f9f9;
+        border-radius: 8px;
+        overflow: hidden;
+      }
+      .table-container th, .table-container td {
+        padding: 10px 12px;
+        text-align: left;
+      }
+      .table-container th {
+        background: #e6f0ff;
+        font-weight: 600;
+        color: #004a99;
+      }
+      .table-container tr:nth-child(even) td {
+        background: #f2f9ff;
+      }
+      .row-label {
+        width: 120px;
+        font-weight: 500;
+        color: #333;
+      }
+      .pair-card { display: none; }
+    }
+
+    @media(max-width:600px) {
+      h1 { font-size: 20px; }
+      input.name { padding: 6px 10px; font-size: 13px; }
+      .table-container { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <img src="ruta_del_logo.png" class="card-logo" alt="Logo" style="height:70px; width:auto;">
+    <div class="card-header">
+      <div>
+        <h1 id="pozoTitle"></h1>
+        <div class="meta">Formato: Pareja X — Nombre 1 | Nombre 2</div>
+        <div class="countdown" id="countdown"></div>
+      </div>
+      <div class="status" id="connStatus">Conectando…</div>
+    </div>
+
+    <div style="margin-bottom:12px">
+      <label class="small">Fecha del pozo:</label><br>
+      <input id="titleInput" class="name" placeholder="Ej: Pozo 1 de Octubre" />
+    </div>
+
+    <div class="table-container">
+      <table aria-label="Tabla de parejas">
+        <thead>
+          <tr>
+            <th>Pareja</th>
+            <th>Jugador A</th>
+            <th>Jugador B</th>
+          </tr>
+        </thead>
+        <tbody id="pairsBody"></tbody>
+      </table>
+    </div>
+    <div id="pairsMobile"></div>
+
+    <hr style="margin:24px 0; border:none; border-top:1px solid #ddd;">
+
+    <h2 style="color:#004a99; font-size:20px; margin-bottom:8px;">Reservas</h2>
+    <div class="table-container">
+      <table aria-label="Tabla de reservas">
+        <thead>
+          <tr>
+            <th>Reserva</th>
+            <th>Jugador A</th>
+            <th>Jugador B</th>
+          </tr>
+        </thead>
+        <tbody id="reservesBody"></tbody>
+      </table>
+    </div>
+    <div id="reservesMobile"></div>
+
+    <button id="clearBtn" disabled>Limpiar campos</button>
+    <div class="footer-note">Los cambios se guardan automáticamente y se ven en tiempo real.</div>
+  </div>
+
+  <div id="rankingSection">
+    <h2>Ranking <span class="purple-text">Mindset For Growth</span></h2>
+  
+    <table id="rankingTable" role="table" aria-label="Ranking">
+      <thead>
+        <tr>
+          <th style="width:40px;">#</th>
+          <th>Nombre</th>
+          <th style="width:120px; text-align:center;">Puntos</th>
+          <th style="width:120px; text-align:center; color:#8000ff;">Partidos Ganados</th>
+        </tr>
+      </thead>
+      <tbody id="rankingBody"></tbody>
+    </table>
+    <div style="text-align:center; margin-top:12px;">
+      <button id="editRankingBtn" style="padding:8px 14px; background:#004a99; color:white; border:none; border-radius:6px; cursor:pointer; font-weight:600;">Editar Ranking</button>
+      <button id="saveRankingBtn" style="display:none; padding:8px 14px; background:#00b33c; color:white; border:none; border-radius:6px; cursor:pointer; font-weight:600;">Guardar</button>
+      <button id="backRankingBtn" style="display:none; padding:8px 14px; background:#777; color:white; border:none; border-radius:6px; cursor:pointer; font-weight:600;">Volver</button>
+    </div>
+  </div>
+
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+  <script>
+    // === Firebase Config ===
+    const firebaseConfig = {
+      apiKey: "AIzaSyAoIs9qWZlW7ikQvNZ4DOyF-epSO20_Mws",
+      authDomain: "pozo-miercoles.firebaseapp.com",
+      projectId: "pozo-miercoles",
+      storageBucket: "pozo-miercoles.appspot.com",
+      messagingSenderId: "847416490553",
+      appId: "1:847416490553:web:1692e6b253231fda3e6be8",
+      measurementId: "G-CJS3082XTJ"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    const POZO_DOC_REF = db.doc("pozos/pozo_1_octubre");
+    const pairsBody = document.getElementById("pairsBody");
+    const pairsMobile = document.getElementById("pairsMobile");
+    const reservesBody = document.getElementById("reservesBody");
+    const reservesMobile = document.getElementById("reservesMobile");
+    const titleInput = document.getElementById("titleInput");
+    const pozoTitle = document.getElementById("pozoTitle");
+    const connStatus = document.getElementById("connStatus");
+    const countdownEl = document.getElementById("countdown");
+    const clearBtn = document.getElementById("clearBtn");
+
+    const RANKING_DOC_REF = db.doc("pozos/ranking_general");
+    const rankingBody = document.getElementById("rankingBody");
+    const editRankingBtn = document.getElementById("editRankingBtn");
+    const saveRankingBtn = document.getElementById("saveRankingBtn");
+    const backRankingBtn = document.getElementById("backRankingBtn");
+
+   function debounce(fn, wait){
+  let t;
+  return (...args)=>{ clearTimeout(t); t=setTimeout(()=>fn(...args), wait); }
+}
+
+// Crear tabla y tarjetas móviles para parejas (original: 8)
+for(let i=1;i<=8;i++){
+  // desktop
+  const tr = document.createElement("tr");
+  tr.innerHTML=`<td class="row-label">Pareja ${i}</td>
+                <td><input class="name" data-pair="${i}" data-side="a" placeholder=" "></td>
+                <td><input class="name" data-pair="${i}" data-side="b" placeholder=" "></td>`;
+  pairsBody.appendChild(tr);
+
+  // mobile
+  const div = document.createElement("div");
+  div.className="pair-card";
+  div.innerHTML=`<label>Pareja ${i}</label>
+                 <input class="name" data-pair="${i}" data-side="a" placeholder=" ">
+                 <input class="name" data-pair="${i}" data-side="b" placeholder=" ">`;
+  pairsMobile.appendChild(div);
+}
+
+// Crear tabla y tarjetas móviles para Reservas (original: 4)
+for(let i=1;i<=4;i++){
+  // desktop
+  const tr = document.createElement("tr");
+  tr.innerHTML=`<td class="row-label">Reserva ${i}</td>
+                <td><input class="name" data-reserve="${i}" data-side="a" placeholder=" "></td>
+                <td><input class="name" data-reserve="${i}" data-side="b" placeholder=" "></td>`;
+  reservesBody.appendChild(tr);
+
+  // mobile
+  const div = document.createElement("div");
+  div.className="pair-card";
+  div.innerHTML=`<label>Reserva ${i}</label>
+                 <input class="name" data-reserve="${i}" data-side="a" placeholder=" ">
+                 <input class="name" data-reserve="${i}" data-side="b" placeholder=" ">`;
+  reservesMobile.appendChild(div);
+}
+
+// Detectar vista móvil
+function isMobileView(){ return window.innerWidth <= 600; }
+
+// Tiempo Costa Rica
+function getCostaRicaTime(){ return new Date(new Date().toLocaleString("en-US",{timeZone:"America/Costa_Rica"})); }
+
+// Rango editable lunes 10am a miércoles 10pm
+function isEditable(){
+  const now = getCostaRicaTime();
+  const day = now.getDay(); // 0=Dom, 1=Lun, ..., 6=Sab
+
+  // Lunes de esta semana
+  const mondayStart = new Date(now);
+  mondayStart.setDate(now.getDate() - ((day + 6) % 7)); 
+  mondayStart.setHours(10,0,0,0);
+
+  // Miércoles 10pm
+  const wedEnd = new Date(mondayStart);
+  wedEnd.setDate(mondayStart.getDate() + 2);
+  wedEnd.setHours(22,0,0,0);
+
+  return now >= mondayStart && now <= wedEnd;
+}
+
+// Actualiza inputs bloqueados
+function updateEditableState(){
+  const editable = isEditable();
+  document.querySelectorAll("input.name").forEach(inp=>{
+    if(inp===titleInput) return;
+    inp.disabled = !editable;
+  });
+  clearBtn.disabled = editable; // solo activo cuando está bloqueado
+}
+
+// Countdown
+function updateCountdown(){
+  const now = getCostaRicaTime();
+  const day = now.getDay();
+  const nextMonday = new Date(now); 
+  nextMonday.setDate(now.getDate() + ((1 - day + 7) % 7)); 
+  nextMonday.setHours(10,0,0,0);
+  let diff = nextMonday - now; if(diff<0) diff=0;
+  const h=Math.floor(diff/1000/3600);
+  const m=Math.floor((diff/1000%3600)/60);
+  const s=Math.floor(diff/1000%60);
+  countdownEl.textContent=`Comienza inscripción en: ${h}h ${m}m ${s}s`;
+}
+
+// Guardar cambios (parejas)
+function saveField(pair, side, value){
+  POZO_DOC_REF.set({ [`pair${pair}_${side}`]: value }, { merge:true }).catch(console.error);
+}
+const debouncedSave = debounce(saveField, 400);
+
+// Guardar reservas
+function saveReserve(reserve, side, value){
+  POZO_DOC_REF.set({ [`reserve${reserve}_${side}`]: value }, { merge:true }).catch(console.error);
+}
+const debouncedSaveReserve = debounce(saveReserve, 400);
+
+// Inputs de parejas
+document.querySelectorAll("#pairsBody input, #pairsMobile input").forEach(inp=>{
+  inp.addEventListener("input", e=>{
+    if(!isEditable()) return;
+    if((isMobileView() && inp.closest("#pairsMobile")) || (!isMobileView() && inp.closest("#pairsBody"))){
+      debouncedSave(inp.dataset.pair, inp.dataset.side, inp.value);
+    }
+  });
+});
+
+// Inputs de reservas
+document.querySelectorAll("#reservesBody input, #reservesMobile input").forEach(inp=>{
+  inp.addEventListener("input", e=>{
+    if(!isEditable()) return;
+    if((isMobileView() && inp.closest("#reservesMobile")) || (!isMobileView() && inp.closest("#reservesBody"))){
+      debouncedSaveReserve(inp.dataset.reserve, inp.dataset.side, inp.value);
+    }
+  });
+});
+
+// Título siempre editable
+titleInput.addEventListener("input", debounce(e=>{
+  POZO_DOC_REF.set({ title:e.target.value }, { merge:true }).catch(console.error);
+},400));
+
+// Inicializar doc (parejas/reservas)
+POZO_DOC_REF.get().then(doc=>{
+  if(!doc.exists){
+    const init={title:"Pozo 1 de Octubre"};
+    for(let i=1;i<=8;i++){ init[`pair${i}_a`] = ""; init[`pair${i}_b`] = ""; }
+    for(let i=1;i<=4;i++){ init[`reserve${i}_a`] = ""; init[`reserve${i}_b`] = ""; }
+    POZO_DOC_REF.set(init);
+  }
+});
+
+// Listener en vivo (parejas/reservas)
+POZO_DOC_REF.onSnapshot(doc=>{
+  const data = doc.data()||{};
+  connStatus.textContent = "Conectado (en vivo)";
+  if(data.title){ pozoTitle.textContent=data.title; if(document.activeElement!==titleInput) titleInput.value=data.title; }
+
+  // Actualizar parejas
+  if(isMobileView()){
+    document.querySelectorAll("#pairsMobile input").forEach(inp=>{
+      const key = `pair${inp.dataset.pair}_${inp.dataset.side}`;
+      if(document.activeElement!==inp) inp.value=data[key]||"";
+    });
+  } else {
+    document.querySelectorAll("#pairsBody input").forEach(inp=>{
+      const key = `pair${inp.dataset.pair}_${inp.dataset.side}`;
+      if(document.activeElement!==inp) inp.value=data[key]||"";
+    });
+  }
+
+  // Actualizar reservas
+  if(isMobileView()){
+    document.querySelectorAll("#reservesMobile input").forEach(inp=>{
+      const key = `reserve${inp.dataset.reserve}_${inp.dataset.side}`;
+      if(document.activeElement!==inp) inp.value=data[key]||"";
+    });
+  } else {
+    document.querySelectorAll("#reservesBody input").forEach(inp=>{
+      const key = `reserve${inp.dataset.reserve}_${inp.dataset.side}`;
+      if(document.activeElement!==inp) inp.value=data[key]||"";
+    });
+  }
+});
+
+// ***************** RANKING: LÓGICA JS (se agregó) *****************
+
+// Estado local de edición
+let rankingEditing = false;
+let rankingCache = []; // array de {name, points, wins}
+
+// Renderiza tabla (modo lectura o edición)
+// editing = boolean
+function renderRanking(editing = false){
+  rankingBody.innerHTML = "";
+  // aseguramos 40 filas cuando editando
+  const rows = editing ? (rankingCache.slice() || []) : (rankingCache.slice() || []);
+  if(editing){
+    for(let i = rows.length; i < 40; i++){
+      rows.push({ name: "", points: 0, wins: 0 });
+    }
+  }
+  rows.forEach((r, idx) => {
+    const tr = document.createElement("tr");
+    if(editing){
+      tr.innerHTML = `
+        <td style="text-align:center;">${idx+1}</td>
+        <td><input data-idx="${idx}" data-field="name" value="${escapeHtml(r.name||'')}" style="width:100%; padding:6px; box-sizing:border-box;"></td>
+        <td style="text-align:center;"><input type="number" data-idx="${idx}" data-field="points" value="${r.points||0}" style="width:90px; padding:6px; box-sizing:border-box;"></td>
+        <td style="text-align:center;"><input type="number" data-idx="${idx}" data-field="wins" value="${r.wins||0}" style="width:90px; padding:6px; box-sizing:border-box;"></td>
+      `;
+    } else {
+      tr.innerHTML = `
+        <td style="text-align:center;">${idx+1}</td>
+        <td>${escapeHtml(r.name||'')}</td>
+        <td style="text-align:center;">${r.points||0}</td>
+        <td style="text-align:center;">${r.wins||0}</td>
+      `;
+    }
+    rankingBody.appendChild(tr);
+  });
+}
+
+// utilidad para escapar (evitar problemas con comillas en value)
+function escapeHtml(str){
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+
+// cargar ranking desde Firestore (y mantener listener)
+RANKING_DOC_REF.get().then(doc=>{
+  if(!doc.exists){
+    // inicializar con vacío
+    RANKING_DOC_REF.set({ entries: [] }).catch(console.error);
+  }
+});
+
+// Live listener del ranking
+RANKING_DOC_REF.onSnapshot(doc=>{
+  const data = (doc && doc.data()) || {};
+  rankingCache = Array.isArray(data.entries) ? data.entries.map(e => ({
+    name: e.name || "",
+    points: Number(e.points) || 0,
+    wins: Number(e.wins) || 0
+  })) : [];
+  // Si estamos editando, no forzamos salida (pero actualizamos cache)
+  renderRanking(rankingEditing);
+});
+
+// Editar ranking (pide password)
+editRankingBtn.addEventListener("click", ()=>{
+  const pass = prompt("Contraseña para editar ranking:");
+  if(pass === "pipo.8366"){
+    rankingEditing = true;
+    editRankingBtn.style.display = "none";
+    saveRankingBtn.style.display = "inline-block";
+    backRankingBtn.style.display = "inline-block";
+    // render en modo edición (llenará hasta 40)
+    renderRanking(true);
+    // focus en primer input opcional:
+    const first = rankingBody.querySelector("input[data-field='name']");
+    if(first) first.focus();
+  } else {
+    alert("Contraseña incorrecta");
+  }
+});
+
+// Guardar ranking — lee inputs, crea array, ordena por points desc y guarda en Firestore
+saveRankingBtn.addEventListener("click", ()=>{
+  // leer inputs
+  const rows = [];
+  const inputs = rankingBody.querySelectorAll("tr");
+  inputs.forEach((tr, idx) => {
+    const nameEl = tr.querySelector("input[data-field='name']");
+    const pointsEl = tr.querySelector("input[data-field='points']");
+    const winsEl = tr.querySelector("input[data-field='wins']");
+    if(!nameEl) return; // si por alguna razón no está
+    const name = nameEl.value.trim();
+    const points = parseInt(pointsEl.value) || 0;
+    const wins = parseInt(winsEl.value) || 0;
+    if(name) rows.push({ name, points, wins });
+  });
+
+  // ordenar por puntos desc, si empate por wins desc, si empate por nombre asc
+  rows.sort((a,b)=>{
+    if (b.points !== a.points) return b.points - a.points;
+    if (b.wins !== a.wins) return b.wins - a.wins;
+    return a.name.localeCompare(b.name);
+  });
+
+  // Guardar en Firestore
+  RANKING_DOC_REF.set({ entries: rows }, { merge: true })
+    .then(()=>{
+      rankingEditing = false;
+      editRankingBtn.style.display = "inline-block";
+      saveRankingBtn.style.display = "none";
+      backRankingBtn.style.display = "none";
+      // render en modo lectura (la onSnapshot actualizará rankingCache y render)
+      alert("Ranking guardado y ordenado correctamente.");
+    })
+    .catch(err=>{
+      console.error(err);
+      alert("Error guardando ranking: " + (err.message || err));
+    });
+});
+
+// Botón volver (si se usa en página aparte)
+backRankingBtn.addEventListener("click", ()=>{
+  window.history.back();
+});
+
+// ***************** FIN RANKING *****************
+
+// Botón limpiar campos
+clearBtn.addEventListener("click",()=>{
+  document.querySelectorAll("input.name").forEach(inp=>{
+    if(inp===titleInput) return;
+    inp.value="";
+    if(inp.dataset.pair) saveField(inp.dataset.pair, inp.dataset.side, "");
+    if(inp.dataset.reserve) saveReserve(inp.dataset.reserve, inp.dataset.side, "");
+  });
+});
+
+updateEditableState();
+updateCountdown();
+setInterval(()=>{ updateEditableState(); updateCountdown(); },1000);
+window.addEventListener("resize",()=>{ updateEditableState(); });
+</script>
+</body>
+</html>
