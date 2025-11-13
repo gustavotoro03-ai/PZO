@@ -31,14 +31,15 @@
     .card:hover { transform: translateY(-2px); }
 
     .purple-text { color: #8000ff; }
-    .card-logo {
-      position: absolute;
-      top: 12px;
-      right: 12px;
-      width: 40px;
-      height: auto;
-      z-index: 10;
-    }
+  .card-logos {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  z-index: 10;
+}
     .card-header {
       display: flex;
       align-items: center;
@@ -172,8 +173,10 @@
 <body>
   <div class="card">
     <img src="ruta_del_logo.png" class="card-logo" alt="Logo" style="height:70px; width:auto;">
-    <div class="card-header">
-      <div>
+    <div class="card-logos">
+  <img src="ruta_del_logo.png" alt="Logo 1">
+  <img src="ruta_del_segundo_logo.png" alt="Logo 2">
+</div>
         <h1 id="pozoTitle"></h1>
         <div class="meta">Formato: Pareja X — Nombre 1 | Nombre 2</div>
         <div class="countdown" id="countdown"></div>
@@ -597,4 +600,5 @@ window.addEventListener("resize",()=>{ updateEditableState(); });
 </script>
 </body>
 </html>
+
 
